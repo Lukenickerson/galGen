@@ -1,0 +1,98 @@
+body {
+	background-color: #000;
+	color: #abf;
+	font-family: 'Ubuntu', sans-serif;
+}
+.splash {
+	text-align: center;
+	padding: 4em 0;
+}
+	.splash h1 {
+		font-size: 400%;
+		margin: 0;
+	}
+	.splash .subtitle {
+		display: block;
+		font-size: 40%;
+	}
+
+input {
+	font-family: inherit;
+	font-size: inherit;
+	background-color: inherit;
+	color: inherit;
+	border: solid 1px transparent;
+	border-bottom: solid 1px #abf;
+	outline: none;
+	text-align: center;
+}
+input:focus {
+	border-color: #abf;
+}
+
+form input,
+form label {
+	display: block;
+	margin: 0.5em 0;
+}
+
+button,
+input[type="submit"] {
+	font-family: inherit;
+	font-size: inherit;
+	font-weight: bold;
+	border: none;
+	background-color: #abf;
+	color: #000;
+	border-radius: 0;
+	padding: 0.5em 1em;
+	cursor: pointer;
+}
+
+#stage {
+	position: absolute;
+	z-index: 2;
+	top: 0;
+	left: 0;
+	height: 100%;
+	width: 100%;
+}
+
+.system-info {
+	position: absolute;
+	z-index: 3;
+	transition: all 0.5s ease-in-out;
+	left: -1000px;
+	padding: 1em;
+	min-width: 10em;
+	min-height: 5em;
+	background-color: rgba(0,0,0,0.9);
+	border: solid 1px rgba(170, 187, 255, 0.1);
+}
+	.system-info h1 {
+		margin: 0 0 0.5em 0;
+		font-size: 1.2em;
+	}
+
+.system-marker {
+	position: absolute;
+	z-index: 3;
+	left: -1000px;
+	display: block;
+	width: 10px;
+	height: 10px;
+	border-radius: 20px;
+	border: solid 4px rgba(170, 187, 255, 0.5);
+	transition: all 0.1s ease-in-out;
+}
+
+svg {
+	position: absolute;
+	z-index: 1;
+	top: 0; left: 0;
+	width: 100%;
+	height: 100%;
+}
+.system-connector {
+	transition: all 0.1s ease-in-out;
+}
