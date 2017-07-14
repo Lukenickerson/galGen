@@ -10,7 +10,8 @@ RocketBoots.loadComponents([
 	"Keyboard"
 ]).ready(function(){
 
-	const GALAXY_SIZE_X = 1000,
+	const NUMBER_OF_STARS = 1000,
+		GALAXY_SIZE_X = 1000,
 		GALAXY_SIZE_Y = 800,
 		GALAXY_HALF_SIZE_X = GALAXY_SIZE_X/2,
 		GALAXY_HALF_SIZE_Y = GALAXY_SIZE_Y/2,
@@ -132,6 +133,7 @@ RocketBoots.loadComponents([
 			proportion = Math.min(MAX_ZOOM_PROPORTION, proportion);
 			proportion = Math.max(MIN_ZOOM_PROPORTION, proportion);
 			zoomSystem(proportion);
+			e.preventDefault();
 		});
 
 		let isDown = false;
@@ -151,12 +153,11 @@ RocketBoots.loadComponents([
 				g.stage.camera.move(delta);
 				downPos.set(newPos);
 				if (!didMove) {
-					$marker.hide();
-					$line.hide();
-					$info.hide();
+					closeInfo();
 					didMove = true;
 					$layer.addClass("moving");
 				}
+				e.preventDefault();
 			}
 		}).on('mouseup touchend', function(e){
 			isDown = false;
@@ -243,6 +244,12 @@ RocketBoots.loadComponents([
 		$line.attr("y2", infoEdgeY);
 	}
 
+	function closeInfo() {
+		$marker.hide();
+		$line.hide();
+		$info.hide();
+	}
+
 	function findNearestSystem(pos) {
 		let closestDistance = Infinity;
 		let closestSystem = null;
@@ -258,7 +265,7 @@ RocketBoots.loadComponents([
 	}
 
 	function generateSystems() {
-		i = 1000;
+		i = NUMBER_OF_STARS;
 		while (i-- > 0) {
 			let sys = getNewSystem();
 			systems.push(sys);
@@ -422,6 +429,7 @@ RocketBoots.loadComponents([
 		_.each(systems, function(sys){
 			sys.pos.multiply(amount);
 		});
+		closeInfo();
 	}
 
 
