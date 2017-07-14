@@ -1,0 +1,37 @@
+<html>
+<head>
+	<style>
+		body {
+			-webkit-touch-callout: none;
+			-webkit-user-select: none;
+			-moz-user-select: none;
+			user-select: none;
+		}
+		.thing {
+			display: block;
+			width: 10em;
+			height: 10em;
+			background: green;
+		}
+		.moving {
+			cursor: move;
+		}
+	</style>
+	<script src="https://rocket-boots.github.io/rocket-boots/scripts/libs/jquery-3.1.1.min.js"></script>
+</head>
+<body>
+	<div class="thing"></div>
+	<script>
+		$(document).ready(function(){
+			var $thing = $('.thing');
+			$thing.on('mousedown', function(e){
+				$thing.addClass("moving");
+				console.log("mousedown");
+			}).on('mouseup', function(e){
+				$thing.removeClass("moving");
+				console.log("mouseup");
+			});
+		});
+	</script>
+</body>
+</html>
