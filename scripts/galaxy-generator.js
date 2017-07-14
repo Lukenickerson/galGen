@@ -62,14 +62,24 @@ RocketBoots.loadComponents([
 	});
 
 	var systems = g.systems = [];
+	var $marker = null;
+	var $line = null;
+	var $info = null;
 
 	g.dice.switchToPseudoRandom();
 
 	setupWorld();
 	setupStage();
+	setupDOM();
+	setupEvents();
+	setupLoops();
 	generateSystems();
+	start();
 	drawAll();
 	
+	return g;
+
+	// Hoisted functions
 
 	function drawAll() {
 		g.stage.draw();
@@ -103,18 +113,89 @@ RocketBoots.loadComponents([
 
 		// Connect all world entities to the layer
 		layer.connectEntities(g.world.entities.all);
-
-		g.stage.addClickEvent(clickStage);
 	}
 
+	function setupDOM() {
+		$marker = $('.system-marker').first().hide();
+		$line = $('.system-connector').first().hide();
+		$info = $('.system-info').first().hide();
+	}
+
+	function setupEvents() {
+		const $window = $(window);
+		const WHEEL_SCALE = -250;
+		const MAX_ZOOM_PROPORTION = 2;
+		const MIN_ZOOM_PROPORTION = 0.1;
+		$window.on('wheel', function(e){
+			let scale = (e.originalEvent.deltaY / WHEEL_SCALE);
+			let proportion = 1 + scale;
+			proportion = Math.min(MAX_ZOOM_PROPORTION, proportion);
+			proportion = Math.max(MIN_ZOOM_PROPORTION, proportion);
+			zoomSystem(proportion);
+		});
+
+		let isDown = false;
+		let didMove = false;
+		let downPos = new RocketBoots.Coords();
+		let $layer = $(g.layer.element);
+		let $stage = $(g.stage.element);
+		$layer.on('mousedown touchstart', function(e){
+			isDown = true;
+			didMove = false;
+			downPos.set({x: e.pageX, y: e.pageY});
+			$layer.addClass("moving");
+		}).on('mousemove touchmove', function(e){
+			if (isDown) {
+				let newPos = new RocketBoots.Coords(e.pageX, e.pageY);
+				let delta = downPos.subtract(newPos);
+				delta.y = delta.y * -1;
+				g.stage.camera.move(delta);
+				downPos.set(newPos);
+				if (!didMove) {
+					$marker.hide();
+					$line.hide();
+					$info.hide();
+					didMove = true;
+				}
+			}
+		}).on('mouseup touchend', function(e){
+			isDown = false;
+			downPos.clear();
+			$layer.removeClass("moving");
+		}).on('click touch', function(e){
+			if (!didMove) {
+				let pos = g.stage.getPosition(e.offsetX, e.offsetY);
+				clickStage(pos, e);
+			}
+			didMove = false;
+		});
+
+		$info.on('mousedown', function(e){ $info.addClass("moving"); })
+			.on('mouseup', function(e){ $info.removeClass("moving"); });
+		//g.stage.addClickEvent(clickStage);
+	}
+
+	function setupLoops() {
+		g.loop.set(drawAll, 10)
+			//.addAction(renderDisplay, RENDER_DELAY)
+			//.addAction(botAction, ACTION_DELAY)
+			//.addAction(buildingProcessing, BUILDING_PROCESS_DELAY)
+		;
+	}
+
+	function start() {
+		g.loop.start();
+	}
+
+////////////////////
+
 	function clickStage(pos, e) {
-		let $info = $('.system-info').first();
 		let system = findNearestSystem(pos);
 		let stagePos = g.stage.getStageCoords(system.pos);
 		let x, y;
 		setMarker(stagePos);
 
-		$info.html(
+		$info.show().html(
 			'<h1>' + system.sun.name + '</h1>'
 			+ '<dl>'
 				+ '<dt>Sun</dt>'
@@ -127,7 +208,7 @@ RocketBoots.loadComponents([
 				+ '<dt>Planets</dt>'
 				+ '<dd>' + system.planets.length + '</dd>'
 				+ '<dt>System</dt>'
-				+ '<dd>' +  system.name + ' (' + system.pos.x + ', ' + system.pos.y + ')'
+				+ '<dd>' +  system.name + ' (' + system.originalPos.x + ', ' + system.originalPos.y + ')'
 			+ '</dl>'	
 		);
 		let buffer = g.stage.size.x/10;
@@ -148,21 +229,19 @@ RocketBoots.loadComponents([
 	}
 
 	function setMarker(stagePos) {
-		let $marker = $('.system-marker').first();
-		$marker.css({
+		$marker.show().css({
 			left: stagePos.x - ($marker.outerWidth()/2), 
 			top: stagePos.y - ($marker.outerHeight()/2)
 		});
 	}
 
 	function setConnector(stagePos, infoEdgeX, infoEdgeY) {
-		let $line = $('.system-connector');
+		$line.show();
 		$line.attr("x1", stagePos.x);
 		$line.attr("y1", stagePos.y);
 		$line.attr("x2", infoEdgeX);
 		$line.attr("y2", infoEdgeY);
 	}
-
 
 	function findNearestSystem(pos) {
 		let closestDistance = Infinity;
@@ -176,10 +255,6 @@ RocketBoots.loadComponents([
 		});
 		closestSystem.isHightlighted = true;
 		return closestSystem;
-	}
-
-	function drawHighlight() {
-
 	}
 
 	function generateSystems() {
@@ -211,16 +286,14 @@ RocketBoots.loadComponents([
 		let sys = new RocketBoots.Entity({
 			name: sun.name + " g" + i,
 			number: i,
-			size: {x: 1, y: 1},
+			size: 			{x: 1, y: 1},
 			radius: (0.5 + (MAX_RADIUS * (sun.heatLevel/MAX_HEAT_LEVEL))),
-			pos: {
-				x: x, 
-				y: y
-			},
-			sun: sun,
-			planets: [],
-			color: sun.spectralClassification.drawColor,
-			draw: "circle"
+			originalPos: 	{x: x, y: y},
+			pos: 			{x: x, y: y},
+			sun: 			sun,
+			planets: 		[],
+			color: 			sun.spectralClassification.drawColor,
+			draw: 			"circle"
 		});
 		sys.planets = getRandomPlanets(sys);
 		return sys;
@@ -344,10 +417,12 @@ RocketBoots.loadComponents([
 		// TODO:
 	}
 
-
-
-
-
+	function zoomSystem(amount) {
+		g.stage.camera.pos.multiply(amount);
+		_.each(systems, function(sys){
+			sys.pos.multiply(amount);
+		});
+	}
 
 
 }).init();

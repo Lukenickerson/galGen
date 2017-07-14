@@ -6,6 +6,7 @@ body {
 .splash {
 	text-align: center;
 	padding: 4em 0;
+	font-size: 10px;
 }
 	.splash h1 {
 		font-size: 400%;
@@ -95,4 +96,12 @@ svg {
 }
 .system-connector {
 	transition: all 0.1s ease-in-out;
+}
+
+#stage {
+	user-select: none;
+}
+.moving,
+.moving:active {
+	cursor: move;
 }
