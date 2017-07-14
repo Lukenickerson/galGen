@@ -123,7 +123,7 @@ RocketBoots.loadComponents([
 
 	function setupEvents() {
 		const $window = $(window);
-		const WHEEL_SCALE = -250;
+		const WHEEL_SCALE = -800;
 		const MAX_ZOOM_PROPORTION = 2;
 		const MIN_ZOOM_PROPORTION = 0.1;
 		$window.on('wheel', function(e){
@@ -143,7 +143,6 @@ RocketBoots.loadComponents([
 			isDown = true;
 			didMove = false;
 			downPos.set({x: e.pageX, y: e.pageY});
-			$layer.addClass("moving");
 		}).on('mousemove touchmove', function(e){
 			if (isDown) {
 				let newPos = new RocketBoots.Coords(e.pageX, e.pageY);
@@ -156,6 +155,7 @@ RocketBoots.loadComponents([
 					$line.hide();
 					$info.hide();
 					didMove = true;
+					$layer.addClass("moving");
 				}
 			}
 		}).on('mouseup touchend', function(e){
