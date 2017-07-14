@@ -76,7 +76,7 @@ RocketBoots.loadComponents([
 	generateSystems();
 	start();
 	drawAll();
-	
+
 	return g;
 
 	// Hoisted functions
@@ -425,4 +425,9 @@ RocketBoots.loadComponents([
 	}
 
 
+
+
+
 }).init();
+
+

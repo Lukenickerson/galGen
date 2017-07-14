@@ -3,6 +3,7 @@ body {
 	color: #abf;
 	font-family: 'Ubuntu', sans-serif;
 }
+
 .splash {
 	text-align: center;
 	padding: 4em 0;
@@ -101,7 +102,9 @@ svg {
 #stage {
 	user-select: none;
 }
+
 .moving,
 .moving:active {
 	cursor: move;
 }
+
