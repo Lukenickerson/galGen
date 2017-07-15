@@ -95,7 +95,7 @@ RocketBoots.loadComponents([
 			{x: NEG_GALAXY_HALF_SIZE_X, y: NEG_GALAXY_HALF_SIZE_Y}, // min
 			{x: GALAXY_HALF_SIZE_X, y: GALAXY_HALF_SIZE_Y}, // max
 		);
-		g.world.addEntityGroups(["galaxies", "systems"]);
+		g.world.addEntityGroups(["galaxies", "systems", "planets", "moons"]);
 
 		//g.world.putIn(g.planet, ["planets", "physics", "physical"]);
 		//g.world.putIn(g.moon, ["planets", "physics", "physical"]);
@@ -166,14 +166,14 @@ RocketBoots.loadComponents([
 		}).on('click touch', function(e){
 			if (!didMove) {
 				let pos = g.stage.getPosition(e.offsetX, e.offsetY);
-				clickStage(pos, e);
+				showSystemInfo(pos);
 			}
 			didMove = false;
 		});
 
 		$info.on('mousedown', function(e){ $info.addClass("moving"); })
 			.on('mouseup', function(e){ $info.removeClass("moving"); });
-		//g.stage.addClickEvent(clickStage);
+		//g.stage.addClickEvent(showSystemInfo);
 	}
 
 	function setupLoops() {
@@ -190,7 +190,7 @@ RocketBoots.loadComponents([
 
 ////////////////////
 
-	function clickStage(pos, e) {
+	function showSystemInfo(pos) {
 		let system = findNearestSystem(pos);
 		let stagePos = g.stage.getStageCoords(system.pos);
 		let x, y;
@@ -265,16 +265,17 @@ RocketBoots.loadComponents([
 	}
 
 	function generateSystems() {
-		i = NUMBER_OF_STARS;
+		systems.splice(0, systems.length); // clear
+		let i = NUMBER_OF_STARS;
 		while (i-- > 0) {
-			let sys = getNewSystem();
+			let sys = getNewSystem(i);
 			systems.push(sys);
-			g.world.putIn(sys, ["systems"]);
+			g.world.putIn(sys.entity, ["systems"]);
 		}
 		return systems;
 	}
 
-	function getNewSystem() {
+	function getNewSystem(n) {
 		let newCoords = false;
 		let x, y;
 		while (!newCoords) {
@@ -290,9 +291,9 @@ RocketBoots.loadComponents([
 		let randomizer2 = g.dice.random();
 		let sun = getRandomSun();
 		let radius = getStarRadius(sun.heatLevel, randomizer1);
-		let sys = new RocketBoots.Entity({
-			name: sun.name + " g" + i,
-			number: i,
+		let sys = new System({
+			name: sun.name + " g" + n,
+			number: n,
 			size: 			{x: 1, y: 1},
 			radius: (0.5 + (MAX_RADIUS * (sun.heatLevel/MAX_HEAT_LEVEL))),
 			originalPos: 	{x: x, y: y},
@@ -347,11 +348,19 @@ RocketBoots.loadComponents([
 	}
 
 	function getRandomPlanet(system, n) {
-		let planet = new RocketBoots.Entity({ // TODO: switch to custom class
+		const dnaLength = 10;
+		const startSeed = g.dice.getSeed();
+		g.dice.setSeed((startSeed + dnaLength));
+		let planet = new Planet({ 
+			system: system,
+			seed: startSeed,
+			dnaLength: dnaLength,
+
+			number: n,
 			name: system.sun.name + "-" + n,
 			radius: 10, // TODO: generate
 			pos: {}, // TODO: generate based on orbit radius
-			draw: "circle"
+			draw: "circle",
 		});
 		return planet;
 	}
