@@ -59,7 +59,7 @@ RocketBoots.loadComponents([
 			{"stage": "Stage"},
 			{"keyboard": "Keyboard"}
 		],
-		version: "alpha-v0.0.0"
+		version: "alpha-v0.1.0"
 	});
 
 	var systems = g.systems = [];
@@ -149,12 +149,13 @@ RocketBoots.loadComponents([
 			if (isDown) {
 				let newPos = new RocketBoots.Coords(e.pageX, e.pageY);
 				let delta = downPos.subtract(newPos);
+				let distance = delta.getMagnitude();
 				delta.y = delta.y * -1;
 				g.stage.camera.move(delta);
 				downPos.set(newPos);
-				if (!didMove) {
+				didMove = (distance > 1);
+				if (didMove) {
 					closeInfo();
-					didMove = true;
 					$layer.addClass("moving");
 				}
 				e.preventDefault();

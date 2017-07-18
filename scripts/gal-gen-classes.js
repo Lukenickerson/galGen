@@ -71,7 +71,7 @@ class Galaxy extends AstroObject {
 class System extends AstroObject {
 	constructor(options) {
 		super(options, options);
-		classConstructor(this, options, ["sun", "planets", "originalPos"], ["pos"]);
+		classConstructor(this, options, ["sun", "planets", "originalPos"], ["pos", "name"]);
 	}
 	deconstruct() {
 		delete this.planets;
