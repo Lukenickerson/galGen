@@ -15,10 +15,11 @@ RocketBoots.loadComponents([
 		GALAXY_SIZE_Y = 800,
 		GALAXY_HALF_SIZE_X = GALAXY_SIZE_X/2,
 		GALAXY_HALF_SIZE_Y = GALAXY_SIZE_Y/2,
-		MAX_PLANETS = 8;
-	const MAX_HEAT_LEVEL = 700; // 7 Classes * 10 numerals * 10 fractions
-	const MAX_RADIUS = 1.5;
-	const MAX_LUMINOSITY_LEVEL = 9;
+		MAX_PLANETS = 8,
+		MAX_HEAT_LEVEL = 700, // 7 Classes * 10 numerals * 10 fractions
+		MAX_RADIUS = 1.5,
+		MAX_LUMINOSITY_LEVEL = 9
+	;
 
 	const SYLLABLES = [
 		'a', 'agg',	'atta',	'akk',
@@ -49,17 +50,34 @@ RocketBoots.loadComponents([
 		'za', 'zo'
 	];
 
-	var g = window.g = new RocketBoots.Game({
+	var worldOptions = {
+		name: "Galaxy",
+		isBounded: true,
+		entityGroups: ["galaxies", "systems", "planets", "moons"],
+		size: {x: GALAXY_SIZE_X, y: GALAXY_SIZE_Y}
+	};
+
+	var states = {
+		"setup": {
+			start: setup
+		},
+		"map": {
+			start: startMapState,
+			end: endMapState
+		}
+	};
+
+	var g = new RocketBoots.Game({
 		name: "galGen",
 		instantiateComponents: [
-			{"state": "StateMachine"},
+			{"state": "StateMachine", "options": {"states": states}},
 			{"loop": "Loop"},
 			{"dice": "Dice"},
-			{"world": "World"},
+			{"world": "World", "options": worldOptions},
 			{"stage": "Stage"},
 			{"keyboard": "Keyboard"}
 		],
-		version: "alpha-v0.1.0"
+		version: "alpha-v0.1.1"
 	});
 
 	var systems = g.systems = [];
@@ -67,42 +85,34 @@ RocketBoots.loadComponents([
 	var $line = null;
 	var $info = null;
 
-	g.dice.switchToPseudoRandom();
+	g.state.transition("setup");
 
-	setupWorld();
-	setupStage();
-	setupDOM();
-	setupEvents();
-	setupLoops();
-	generateSystems();
-	start();
-	drawAll();
-
+	window.g = g;
 	return g;
 
 	// Hoisted functions
+
+	function startMapState() {
+		g.loop.start();
+		drawAll();
+	}
+
+	function endMapState() {
+		g.loop.end();
+	}
 
 	function drawAll() {
 		g.stage.draw();
 	}
 
-	function setupWorld() {
-		const NEG_GALAXY_HALF_SIZE_X = GALAXY_HALF_SIZE_X * -1;
-		const NEG_GALAXY_HALF_SIZE_Y = GALAXY_HALF_SIZE_Y * -1;
-		g.world.name = "Galaxy";
-		g.world.isBounded = true;
-		g.world.setSizeRange(
-			{x: NEG_GALAXY_HALF_SIZE_X, y: NEG_GALAXY_HALF_SIZE_Y}, // min
-			{x: GALAXY_HALF_SIZE_X, y: GALAXY_HALF_SIZE_Y}, // max
-		);
-		g.world.addEntityGroups(["galaxies", "systems", "planets", "moons"]);
-
-		//g.world.putIn(g.planet, ["planets", "physics", "physical"]);
-		//g.world.putIn(g.moon, ["planets", "physics", "physical"]);
-		//g.world.putIn(g.bot, ["bot", "physics", "physical"]);
-
-		g.stage.resize();
-
+	function setup() {
+		g.dice.switchToPseudoRandom();
+		setupStage();
+		setupDOM();
+		setupEvents();
+		setupLoops();
+		generateSystems();
+		g.state.transition("map");
 	}
 
 	function setupStage() {
@@ -183,10 +193,6 @@ RocketBoots.loadComponents([
 			//.addAction(botAction, ACTION_DELAY)
 			//.addAction(buildingProcessing, BUILDING_PROCESS_DELAY)
 		;
-	}
-
-	function start() {
-		g.loop.start();
 	}
 
 ////////////////////
